@@ -47,8 +47,27 @@ defmodule V do
     [x1 * k, y1 * k, z1 * k]
   end
 
-  def div([x,y,z], k) do
+  def div([x, y, z], k) do
     [x / k, y / k, z / k]
   end
 
+  def length_squared(v) do
+    V.dot(v, v)
+  end
+
+  def length(v) do
+    :math.sqrt(V.length_squared(v))
+  end
+
+  def to_string([x, y, z]) do
+    "#{trunc(x)} #{trunc(y)} #{trunc(z)}"
+  end
+
+  def make_unit(v) do
+    V.div(v, V.length(v))
+  end
+
+  def cross([x1, y1, z1], [x2, y2, z2]) do
+    [y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2]
+  end
 end

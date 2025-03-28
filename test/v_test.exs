@@ -55,4 +55,33 @@ defmodule VTest do
     v = V.new(2, 4, 6)
     assert V.div(v, 2) == [1.0, 2.0, 3.0]
   end
+
+  test "Vector length" do
+    v = V.new(1, 2, 2)
+    assert V.length(v) == 3.0
+    w = V.new(2, 10, 11)
+    assert V.length(w) == 15.0
+  end
+
+  test "Vector prints" do
+    v = V.new(1, 2, 2)
+    assert V.to_string(V.div(v, 2)) == "0 1 1"
+  end
+
+  test "Find unit vector" do
+    v = V.new(1, 2, 2)
+    assert V.make_unit(v) == [1 / 3, 2 / 3, 2 / 3]
+  end
+
+  test "cross product" do
+    v = V.new(3, -3, 1)
+    w = V.new(4, 9, 2)
+    assert V.cross(v,w) == [-15, -2, 39]
+  end
+
+  test "cross product 2" do
+    v = V.new(3, -3, 1)
+    w = V.new(-12, 12, -4)
+    assert V.cross(v,w) == [0, 0, 0]
+  end
 end
