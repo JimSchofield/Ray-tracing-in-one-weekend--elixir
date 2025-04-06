@@ -7,7 +7,7 @@ defmodule Ray do
   end
 
   def at(ray, t) do
-    V.add(ray.origin, V.k(ray, t))
+    V.add(ray.origin, V.k(ray.direction, t))
   end
 
 end

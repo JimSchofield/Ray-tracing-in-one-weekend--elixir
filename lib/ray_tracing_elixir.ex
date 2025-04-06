@@ -4,11 +4,35 @@ defmodule RT do
   from [Ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
   """
   def ray_color(r) do
-    unit_direction = V.make_unit(r.direction)
-    a = 0.5 * (V.y(unit_direction) + 1.0)
+    case hit_sphere(V.new(0.0, 0.0, -1.0), 0.5, r) do
+      t when t >= 0 ->
+        r_at_t = Ray.at(r,t)
+        n = V.make_unit(V.sub(r_at_t, V.new(0.0, 0.0, -1.0)))
 
-    V.k(Color.new(1.0, 1.0, 1.0), (1.0 - a))
-      |>V.add(V.k(Color.new(0.5, 0.7, 1.0), a))
+        V.k(0.5, V.add(n, V.new(1.0, 1.0, 1.0)))
+
+      t when t < 0 ->
+        unit_direction = V.make_unit(r.direction)
+        a = 0.5 * (V.y(unit_direction) + 1.0)
+
+        V.k(Color.new(1.0, 1.0, 1.0), 1.0 - a)
+        |> V.add(V.k(Color.new(0.5, 0.7, 1.0), a))
+    end
+  end
+
+  def hit_sphere(center, radius, r) do
+    oc = V.sub(center, r.origin)
+    a = V.dot(r.direction, r.direction)
+    b = -2.0 * V.dot(r.direction, oc)
+    c = V.dot(oc, oc) - radius * radius
+    discr = b * b - 4 * a * c
+
+    cond do
+      discr < 0 ->
+        -1.0 
+      discr >=0 ->
+        (-b - :math.sqrt(discr)) / (2 * a)
+    end
   end
 
   def main do
