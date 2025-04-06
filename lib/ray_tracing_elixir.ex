@@ -22,22 +22,22 @@ defmodule RT do
 
   def hit_sphere(center, radius, r) do
     oc = V.sub(center, r.origin)
-    a = V.dot(r.direction, r.direction)
-    b = -2.0 * V.dot(r.direction, oc)
-    c = V.dot(oc, oc) - radius * radius
-    discr = b * b - 4 * a * c
+    a = V.length_squared(r.direction)
+    h = V.dot(r.direction, oc)
+    c = V.length_squared(oc) - radius * radius
+    discr = h * h - a * c
 
     cond do
       discr < 0 ->
         -1.0 
       discr >=0 ->
-        (-b - :math.sqrt(discr)) / (2 * a)
+        (h - :math.sqrt(discr)) / a
     end
   end
 
   def main do
     aspect_ratio = 16.0 / 9.0
-    image_width = 400
+    image_width = 1400
     image_height = trunc(image_width / aspect_ratio)
 
     focal_length = 1.0
