@@ -3,42 +3,32 @@ defmodule RT do
   Ray tracer written in Elixir
   from [Ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
   """
-  def ray_color(r) do
-    case hit_sphere(V.new(0.0, 0.0, -1.0), 0.5, r) do
-      t when t >= 0 ->
-        r_at_t = Ray.at(r,t)
-        n = V.make_unit(V.sub(r_at_t, V.new(0.0, 0.0, -1.0)))
+  def ray_color(r, hittable_list) do
+    {hit, _max, record} = HittableList.hit(hittable_list, r, 0.0, :infinity)
 
-        V.k(0.5, V.add(n, V.new(1.0, 1.0, 1.0)))
+    if hit do
+      record.normal
+      |> V.add(V.new(1.0, 1.0, 1.0))
+      |> V.k(0.5)
+    else
+      unit_direction = V.make_unit(r.direction)
+      a = 0.5 * (V.y(unit_direction) + 1.0)
 
-      t when t < 0 ->
-        unit_direction = V.make_unit(r.direction)
-        a = 0.5 * (V.y(unit_direction) + 1.0)
-
-        V.k(Color.new(1.0, 1.0, 1.0), 1.0 - a)
-        |> V.add(V.k(Color.new(0.5, 0.7, 1.0), a))
-    end
-  end
-
-  def hit_sphere(center, radius, r) do
-    oc = V.sub(center, r.origin)
-    a = V.length_squared(r.direction)
-    h = V.dot(r.direction, oc)
-    c = V.length_squared(oc) - radius * radius
-    discr = h * h - a * c
-
-    cond do
-      discr < 0 ->
-        -1.0 
-      discr >=0 ->
-        (h - :math.sqrt(discr)) / a
+      V.k(Color.new(1.0, 1.0, 1.0), 1.0 - a)
+      |> V.add(V.k(Color.new(0.5, 0.7, 1.0), a))
     end
   end
 
   def main do
     aspect_ratio = 16.0 / 9.0
-    image_width = 1400
+    image_width = 600
     image_height = trunc(image_width / aspect_ratio)
+
+    # World
+    world =
+      %HittableList{}
+      |> HittableList.add(Sphere.new(V.new(0.0, 0.0, -1.0), 0.5))
+      |> HittableList.add(Sphere.new(V.new(0.0, -100.5, -1.0), 100.0))
 
     focal_length = 1.0
     viewport_height = 2.0
@@ -75,7 +65,7 @@ defmodule RT do
 
             r = Ray.new(camera_center, ray_direction)
 
-            pixel_color = ray_color(r)
+            pixel_color = ray_color(r, world)
             pixel = Color.write_color(pixel_color)
 
             # pixel <> iacc
