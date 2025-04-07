@@ -5,7 +5,7 @@ defmodule Sphere do
     %Sphere{center: center, radius: radius}
   end
 
-  def hit(object, r, ray_tmin, ray_tmax) do
+  def hit(object, r, interval) do
     oc = V.sub(object.center, r.origin)
     a = V.length_squared(r.direction)
     h = V.dot(r.direction, oc)
@@ -23,7 +23,7 @@ defmodule Sphere do
         rootb = (h + sqrtd) / a
 
         cond do
-          ray_tmin < roota && roota < ray_tmax ->
+          Interval.surrounds(interval, roota) ->
             point = Ray.at(r, roota)
             outward_normal = V.div(V.sub(point, object.center), object.radius)
 
@@ -45,7 +45,7 @@ defmodule Sphere do
 
             {true, rec}
 
-          ray_tmin < rootb && rootb < ray_tmax ->
+          Interval.surrounds(interval, rootb) ->
             point = Ray.at(r, rootb)
             outward_normal = V.div(V.sub(point, object.center), object.radius)
             front_face_bool = V.dot(r.direction, outward_normal) < 0.0

@@ -4,7 +4,7 @@ defmodule RT do
   from [Ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
   """
   def ray_color(r, hittable_list) do
-    {hit, _max, record} = HittableList.hit(hittable_list, r, 0.0, :infinity)
+    {hit, _max, record} = HittableList.hit(hittable_list, r, Interval.new(0.0, :infinity))
 
     if hit do
       record.normal
