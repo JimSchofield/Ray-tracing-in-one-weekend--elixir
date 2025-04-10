@@ -13,10 +13,10 @@ defmodule Camera do
       |> V.k(0.5)
     else
       unit_direction = V.make_unit(r.direction)
-      a = 0.5 * (V.y(unit_direction) + 1.0)
+      a = 0.5 * (unit_direction.y + 1.0)
 
-      V.k(Color.new(1.0, 1.0, 1.0), 1.0 - a)
-      |> V.add(V.k(Color.new(0.5, 0.7, 1.0), a))
+      V.k(V.new(1.0, 1.0, 1.0), 1.0 - a)
+      |> V.add(V.k(V.new(0.5, 0.7, 1.0), a))
     end
   end
 
@@ -42,7 +42,7 @@ defmodule Camera do
 
     viewport_upper_left =
       camera_center
-      |> V.sub([0, 0, focal_length])
+      |> V.sub(V.new(0, 0, focal_length))
       |> V.sub(V.div(viewport_u, 2))
       |> V.sub(V.div(viewport_v, 2))
 

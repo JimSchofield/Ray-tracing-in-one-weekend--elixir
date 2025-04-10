@@ -12,4 +12,12 @@ defmodule Interval do
   def surrounds(int, num) do
     int.min < num && num < int.max
   end
+
+  def clamp(%Interval{min: min, max: max}, x) do
+    case x do
+      x when x < min -> min
+      x when x > max -> max
+      _ -> x
+    end
+  end
 end
