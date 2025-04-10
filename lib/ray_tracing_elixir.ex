@@ -3,7 +3,7 @@ defmodule RT do
   Ray tracer written in Elixir
   from [Ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
   """
-  def main do
+  def main(_args \\ []) do
     aspect_ratio = 16.0 / 9.0
     image_width = 600
 
