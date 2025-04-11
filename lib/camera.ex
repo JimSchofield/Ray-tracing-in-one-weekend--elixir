@@ -2,6 +2,7 @@ defmodule Camera do
   defstruct [
     :image_width,
     :aspect_ratio,
+    :samples_per_pixel
   ]
 
   def ray_color(r, hittable_list) do
@@ -20,11 +21,28 @@ defmodule Camera do
     end
   end
 
+  def get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, center) do
+    offset = V.new(Random.float() - 0.5, Random.float() - 0.5, 0)
+
+    pixel_sample =
+      pixel00_loc
+      |> V.add(V.k(i + offset.x, pixel_delta_u))
+      |> V.add(V.k(j + offset.y, pixel_delta_v))
+
+    ray_origin = center
+    ray_direction = V.sub(pixel_sample, ray_origin)
+
+    Ray.new(ray_origin, ray_direction)
+  end
+
   def render(world, config) do
     %Camera{
       image_width: image_width,
-      aspect_ratio: aspect_ratio
+      aspect_ratio: aspect_ratio,
+      samples_per_pixel: samples_per_pixel
     } = config
+
+    pixel_samples_scale = 1.0 / samples_per_pixel
 
     image_height = trunc(image_width / aspect_ratio)
 
@@ -54,19 +72,15 @@ defmodule Camera do
 
         jacc <>
           Enum.reduce(0..(image_width - 1), "", fn i, iacc ->
-            pixel_center =
-              pixel00_loc
-              |> V.add(V.k(pixel_delta_u, i))
-              |> V.add(V.k(pixel_delta_v, j))
+            pixel_color =
+              Enum.reduce(0..(samples_per_pixel - 1), V.splat(0.0), fn _i, acc ->
+                r = get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, camera_center)
 
-            ray_direction = V.sub(pixel_center, camera_center)
+                V.add(acc, ray_color(r, world))
+              end)
 
-            r = Ray.new(camera_center, ray_direction)
+            pixel = Color.write_color(V.k(pixel_color, pixel_samples_scale))
 
-            pixel_color = ray_color(r, world)
-            pixel = Color.write_color(pixel_color)
-
-            # pixel <> iacc
             iacc <> pixel
           end)
       end)

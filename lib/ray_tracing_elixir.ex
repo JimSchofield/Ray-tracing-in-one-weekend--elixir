@@ -16,6 +16,7 @@ defmodule RT do
     Camera.render(world, %Camera{
       aspect_ratio: aspect_ratio,
       image_width: image_width,
+      samples_per_pixel: 100,
     })
   end
 end
