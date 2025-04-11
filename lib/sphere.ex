@@ -23,7 +23,7 @@ defmodule Sphere do
         rootb = (h + sqrtd) / a
 
         cond do
-          Interval.surrounds(interval, roota) ->
+          Interval.surrounds(roota, interval) ->
             point = Ray.at(r, roota)
             outward_normal = V.div(V.sub(point, object.center), object.radius)
 
@@ -45,7 +45,7 @@ defmodule Sphere do
 
             {true, rec}
 
-          Interval.surrounds(interval, rootb) ->
+          Interval.surrounds(rootb, interval) ->
             point = Ray.at(r, rootb)
             outward_normal = V.div(V.sub(point, object.center), object.radius)
             front_face_bool = V.dot(r.direction, outward_normal) < 0.0

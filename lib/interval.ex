@@ -5,15 +5,19 @@ defmodule Interval do
     %Interval{min: min, max: max}
   end
 
-  def contains(int, num) do
+  def contains(num, int) do
     int.min <= num && num <= int.max
   end
 
-  def surrounds(int, num) do
+  def surrounds(num, int) do
     int.min < num && num < int.max
   end
 
-  def clamp(%Interval{min: min, max: max}, x) do
+  def clamp(%V{} = vec, %Interval{} = int) do
+    V.map(vec, fn n -> clamp(n, int) end)
+  end
+
+  def clamp(x, %Interval{min: min, max: max}) do
     case x do
       x when x < min -> min
       x when x > max -> max

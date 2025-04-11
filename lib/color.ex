@@ -1,13 +1,16 @@
 defmodule Color do
   def new(r, g, b) do
-    V.new(r,g,b)
+    V.new(r, g, b)
   end
 
-  def write_color(%V{x: r, y: g, z: b}) do
-    ir = trunc(r * 255)
-    ig = trunc(g * 255)
-    ib = trunc(b * 255)
+  def write_color(vec) do
+    intensity = Interval.new(0.0, 0.999)
 
-    "#{ir} #{ig} #{ib}\n"
+    color = vec
+      |> Interval.clamp(intensity)
+      |> V.k(255.0)
+      |> V.map(fn x -> trunc(x) end)
+
+    "#{color}\n"
   end
 end

@@ -9,6 +9,14 @@ defmodule V do
     %V{x: x, y: y, z: z}
   end
 
+  def splat(x) do
+    V.new(x, x, x)
+  end
+
+  def map(%V{x: x, y: y, z: z}, f) do
+    V.new(f.(x), f.(y), f.(z))
+  end
+
   def dot(%V{x: x1, y: y1, z: z1}, %V{x: x2, y: y2, z: z2}) do
     x1 * x2 + y1 * y2 + z1 * z2
   end
@@ -17,7 +25,7 @@ defmodule V do
     new(-x, -y, -z)
   end
 
-def add(%V{} = left, %V{} = right) do
+  def add(%V{} = left, %V{} = right) do
     new(left.x + right.x, left.y + right.y, left.z + right.z)
   end
 
@@ -26,7 +34,7 @@ def add(%V{} = left, %V{} = right) do
   end
 
   def mult(%V{} = left, %V{} = right) do
-    new(left.x * right.x, left.y * right.y,left.z * right.z)
+    new(left.x * right.x, left.y * right.y, left.z * right.z)
   end
 
   def k(%V{x: x1, y: y1, z: z1}, k) do
@@ -47,8 +55,8 @@ def add(%V{} = left, %V{} = right) do
 
   def length(v) do
     v
-    |>length_squared
-    |>:math.sqrt
+    |> length_squared
+    |> :math.sqrt()
   end
 
   def make_unit(v) do
