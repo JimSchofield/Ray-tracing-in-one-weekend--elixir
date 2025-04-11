@@ -2,22 +2,27 @@ defmodule Camera do
   defstruct [
     :image_width,
     :aspect_ratio,
-    :samples_per_pixel
+    :samples_per_pixel,
+    :max_depth
   ]
 
-  def ray_color(r, hittable_list) do
-    {hit, _max, record} = HittableList.hit(hittable_list, r, Interval.new(0.0, :infinity))
-
-    if hit do
-      record.normal
-      |> V.add(V.new(1.0, 1.0, 1.0))
-      |> V.k(0.5)
+  def ray_color(r, max_depth, hittable_list) do
+    if max_depth <= 0 do
+      V.splat(0.0)
     else
-      unit_direction = V.make_unit(r.direction)
-      a = 0.5 * (unit_direction.y + 1.0)
+      {hit, _max, record} = HittableList.hit(hittable_list, r, Interval.new(0.001, :infinity))
 
-      V.k(V.new(1.0, 1.0, 1.0), 1.0 - a)
-      |> V.add(V.k(V.new(0.5, 0.7, 1.0), a))
+      if hit do
+        direction = V.add(record.normal, Random.unit_vector())
+
+        V.k(ray_color(Ray.new(record.point, direction), max_depth - 1, hittable_list), 0.5)
+      else
+        unit_direction = V.make_unit(r.direction)
+        a = 0.5 * (unit_direction.y + 1.0)
+
+        V.k(V.new(1.0, 1.0, 1.0), 1.0 - a)
+        |> V.add(V.k(V.new(0.5, 0.7, 1.0), a))
+      end
     end
   end
 
@@ -39,7 +44,8 @@ defmodule Camera do
     %Camera{
       image_width: image_width,
       aspect_ratio: aspect_ratio,
-      samples_per_pixel: samples_per_pixel
+      samples_per_pixel: samples_per_pixel,
+      max_depth: max_depth
     } = config
 
     pixel_samples_scale = 1.0 / samples_per_pixel
@@ -76,7 +82,7 @@ defmodule Camera do
               Enum.reduce(0..(samples_per_pixel - 1), V.splat(0.0), fn _i, acc ->
                 r = get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, camera_center)
 
-                V.add(acc, ray_color(r, world))
+                V.add(acc, ray_color(r, max_depth, world))
               end)
 
             pixel = Color.write_color(V.k(pixel_color, pixel_samples_scale))

@@ -17,6 +17,7 @@ defmodule RT do
       aspect_ratio: aspect_ratio,
       image_width: image_width,
       samples_per_pixel: 100,
+      max_depth: 50,
     })
   end
 end
