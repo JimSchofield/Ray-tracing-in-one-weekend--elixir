@@ -13,9 +13,14 @@ defmodule Camera do
       {hit, _max, record} = HittableList.hit(hittable_list, r, Interval.new(0.001, :infinity))
 
       if hit do
-        direction = V.add(record.normal, Random.unit_vector())
+        mat = record.material
+        {is_hit, attenuation, scattered} = Scatter.scatter(mat, r, record)
 
-        V.k(ray_color(Ray.new(record.point, direction), max_depth - 1, hittable_list), 0.5)
+        if is_hit do
+          V.mult(attenuation, ray_color(scattered, max_depth - 1, hittable_list))
+        else
+          V.splat(0.0)
+        end
       else
         unit_direction = V.make_unit(r.direction)
         a = 0.5 * (unit_direction.y + 1.0)

@@ -66,6 +66,16 @@ defmodule V do
   def cross(%V{x: x1, y: y1, z: z1}, %V{x: x2, y: y2, z: z2}) do
     new(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2)
   end
+
+  def near_zero(%V{x: x, y: y, z: z}) do
+    s = 1.0e-8
+
+    abs(x) < s && abs(y) < s && abs(z) < s
+  end
+
+  def reflect(v, n) do
+    V.sub(v, V.k(2 * V.dot(v,n), n))
+  end
 end
 
 defimpl String.Chars, for: V do

@@ -1,8 +1,8 @@
 defmodule Sphere do
-  defstruct [:center, :radius]
+  defstruct [:center, :radius, :material]
 
-  def new(center, radius) do
-    %Sphere{center: center, radius: radius}
+  def new(center, radius, material) do
+    %Sphere{center: center, radius: radius, material: material}
   end
 
   def hit(object, r, interval) do
@@ -24,51 +24,38 @@ defmodule Sphere do
 
         cond do
           Interval.surrounds(roota, interval) ->
-            point = Ray.at(r, roota)
-            outward_normal = V.div(V.sub(point, object.center), object.radius)
-
-            front_face_bool = V.dot(r.direction, outward_normal) < 0.0
-
-            normal =
-              if front_face_bool do
-                outward_normal
-              else
-                V.k(outward_normal, -1.9)
-              end
-
-            rec = %Hit{
-              t: roota,
-              point: point,
-              normal: normal,
-              front_face: front_face_bool
-            }
-
-            {true, rec}
+            create_hit(r, roota, object)
 
           Interval.surrounds(rootb, interval) ->
-            point = Ray.at(r, rootb)
-            outward_normal = V.div(V.sub(point, object.center), object.radius)
-            front_face_bool = V.dot(r.direction, outward_normal) < 0.0
-
-            normal =
-              if front_face_bool do
-                outward_normal
-              else
-                V.k(outward_normal, -1.9)
-              end
-
-            rec = %Hit{
-              t: rootb,
-              point: point,
-              normal: normal,
-              front_face: front_face_bool
-            }
-
-            {true, rec}
+            create_hit(r, rootb, object)
 
           true ->
             {false, %Hit{}}
         end
     end
+  end
+
+  def create_hit(r, root, object) do
+    point = Ray.at(r, root)
+    outward_normal = V.div(V.sub(point, object.center), object.radius)
+
+    front_face_bool = V.dot(r.direction, outward_normal) < 0.0
+
+    normal =
+      if front_face_bool do
+        outward_normal
+      else
+        V.k(outward_normal, -1.9)
+      end
+
+    rec = %Hit{
+      t: root,
+      point: point,
+      normal: normal,
+      front_face: front_face_bool,
+      material: object.material
+    }
+
+    {true, rec}
   end
 end
