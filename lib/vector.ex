@@ -88,21 +88,20 @@ defmodule V do
 
     r_out_parallel = V.k(-1.0 * :math.sqrt(abs(1.0 - V.length_squared(r_out_perp))), n)
 
-
     V.add(r_out_perp, r_out_parallel)
   end
-end
 
-defimpl String.Chars, for: V do
-  def to_string(%V{x: x, y: y, z: z}) do
-    "#{trunc(x)} #{trunc(y)} #{trunc(z)}"
+  defimpl String.Chars, for: V do
+    def to_string(%V{x: x, y: y, z: z}) do
+      "#{trunc(x)} #{trunc(y)} #{trunc(z)}"
+    end
   end
-end
 
-defimpl Inspect, for: V do
-  import Inspect.Algebra
+  defimpl Inspect, for: V do
+    import Inspect.Algebra
 
-  def inspect(vec, opts) do
-    concat(["#V<", to_doc([x: vec.x, y: vec.y, z: vec.z], opts), ">"])
+    def inspect(vec, opts) do
+      concat(["#V<", to_doc([x: vec.x, y: vec.y, z: vec.z], opts), ">"])
+    end
   end
 end

@@ -55,11 +55,22 @@ defmodule Dialectric do
         end
 
       unit_direction = V.make_unit(ray_in.direction)
-      refracted = V.refract(unit_direction, rec.normal, ri)
 
-      scattered = Ray.new(rec.point, refracted)
+      cos_theta = min(V.dot(V.neg(unit_direction), rec.normal), 1.0)
+      sin_theta = :math.sqrt(1.0 - cos_theta * cos_theta)
 
-      { true, attenuation, scattered }
+      cannot_refract = ri * sin_theta > 1.0
+
+      direction =
+        if cannot_refract do
+          V.reflect(unit_direction, rec.normal)
+        else
+          V.refract(unit_direction, rec.normal, ri)
+        end
+
+      scattered = Ray.new(rec.point, direction)
+
+      {true, attenuation, scattered}
     end
   end
 end
