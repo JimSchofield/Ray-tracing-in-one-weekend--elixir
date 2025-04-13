@@ -74,7 +74,22 @@ defmodule V do
   end
 
   def reflect(v, n) do
-    V.sub(v, V.k(2 * V.dot(v,n), n))
+    V.sub(v, V.k(2 * V.dot(v, n), n))
+  end
+
+  def refract(uv, n, etai_over_etat) do
+    cos_theta = min(V.dot(V.neg(uv), n), 1.0)
+
+    r_out_perp =
+      n
+      |> V.k(cos_theta)
+      |> V.add(uv)
+      |> V.k(etai_over_etat)
+
+    r_out_parallel = V.k(-1.0 * :math.sqrt(abs(1.0 - V.length_squared(r_out_perp))), n)
+
+
+    V.add(r_out_perp, r_out_parallel)
   end
 end
 

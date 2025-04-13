@@ -51,7 +51,7 @@ defmodule Sphere do
     rec = %Hit{
       t: root,
       point: point,
-      normal: normal,
+      normal: V.make_unit(normal),
       front_face: front_face_bool,
       material: object.material
     }

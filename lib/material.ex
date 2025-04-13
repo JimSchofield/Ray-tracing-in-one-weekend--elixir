@@ -29,13 +29,37 @@ defmodule Metal do
     def scatter(material, ray_in, rec) do
       ref = V.reflect(ray_in.direction, rec.normal)
 
-      reflected = V.add(V.make_unit(ref), V.k(material.fuzz,Random.unit_vector()))
+      reflected = V.add(V.make_unit(ref), V.k(material.fuzz, Random.unit_vector()))
 
       scattered = Ray.new(rec.point, reflected)
 
       hit = V.dot(scattered.direction, rec.normal) > 0
 
       {hit, material.color, scattered}
+    end
+  end
+end
+
+defmodule Dialectric do
+  defstruct [:refraction_index]
+
+  defimpl Scatter, for: Dialectric do
+    def scatter(material, ray_in, rec) do
+      attenuation = V.splat(1.0)
+
+      ri =
+        if rec.front_face do
+          1.0 / material.refraction_index
+        else
+          material.refraction_index
+        end
+
+      unit_direction = V.make_unit(ray_in.direction)
+      refracted = V.refract(unit_direction, rec.normal, ri)
+
+      scattered = Ray.new(rec.point, refracted)
+
+      { true, attenuation, scattered }
     end
   end
 end

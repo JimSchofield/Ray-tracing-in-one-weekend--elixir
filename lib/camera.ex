@@ -13,8 +13,7 @@ defmodule Camera do
       {hit, _max, record} = HittableList.hit(hittable_list, r, Interval.new(0.001, :infinity))
 
       if hit do
-        mat = record.material
-        {is_hit, attenuation, scattered} = Scatter.scatter(mat, r, record)
+        {is_hit, attenuation, scattered} = Scatter.scatter(record.material, r, record)
 
         if is_hit do
           V.mult(attenuation, ray_color(scattered, max_depth - 1, hittable_list))
