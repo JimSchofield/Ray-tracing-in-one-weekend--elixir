@@ -7,7 +7,9 @@ defmodule Camera do
     :vfov,
     :lookfrom,
     :lookat,
-    :vup
+    :vup,
+    :defocus_angle,
+    :focus_dist
   ]
 
   def ray_color(r, max_depth, hittable_list) do
@@ -34,7 +36,19 @@ defmodule Camera do
     end
   end
 
-  def get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, center) do
+  # This is rediculous, but I'm not sure how Elixirites would
+  # address this
+  def get_ray(
+        i,
+        j,
+        pixel00_loc,
+        pixel_delta_u,
+        pixel_delta_v,
+        center,
+        defocus_angle,
+        defocus_disk_u,
+        defocus_disk_v
+      ) do
     offset = V.new(Random.float() - 0.5, Random.float() - 0.5, 0)
 
     pixel_sample =
@@ -42,7 +56,13 @@ defmodule Camera do
       |> V.add(V.k(i + offset.x, pixel_delta_u))
       |> V.add(V.k(j + offset.y, pixel_delta_v))
 
-    ray_origin = center
+    ray_origin =
+      if defocus_angle <= 0 do
+        center
+      else
+        defocus_disk_sample(center, defocus_disk_u, defocus_disk_v)
+      end
+
     ray_direction = V.sub(pixel_sample, ray_origin)
 
     Ray.new(ray_origin, ray_direction)
@@ -57,7 +77,9 @@ defmodule Camera do
       vfov: vfov,
       lookfrom: lookfrom,
       lookat: lookat,
-      vup: vup
+      vup: vup,
+      defocus_angle: defocus_angle,
+      focus_dist: focus_dist
     } = config
 
     pixel_samples_scale = 1.0 / samples_per_pixel
@@ -66,16 +88,15 @@ defmodule Camera do
 
     image_height = trunc(image_width / aspect_ratio)
 
-    focal_length = lookfrom |> V.sub(lookat) |> V.length()
     theta = degrees_to_radians(vfov)
     h = :math.tan(theta / 2.0)
-    viewport_height = 2.0 * h * focal_length
+    viewport_height = 2.0 * h * focus_dist
     viewport_width = viewport_height * (image_width / image_height)
 
     # u,v,w unit basis vectors for camera coordinate frame
     w = V.make_unit(V.sub(lookfrom, lookat))
     u = V.make_unit(V.cross(vup, w))
-    v = V.cross(w,u)
+    v = V.cross(w, u)
 
     viewport_u = V.k(viewport_width, u)
     viewport_v = V.k(-1.0 * viewport_height, v)
@@ -85,9 +106,13 @@ defmodule Camera do
 
     viewport_upper_left =
       camera_center
-      |> V.sub(V.k(focal_length,w))
+      |> V.sub(V.k(focus_dist, w))
       |> V.sub(V.div(viewport_u, 2))
       |> V.sub(V.div(viewport_v, 2))
+
+    defocus_radius = focus_dist * :math.tan(degrees_to_radians(defocus_angle / 2))
+    defocus_disk_u = V.k(u, defocus_radius)
+    defocus_disk_v = V.k(v, defocus_radius)
 
     pixel00_loc = V.add(viewport_upper_left, V.div(V.add(pixel_delta_u, pixel_delta_v), 2))
 
@@ -99,7 +124,18 @@ defmodule Camera do
           Enum.reduce(0..(image_width - 1), "", fn i, iacc ->
             pixel_color =
               Enum.reduce(0..(samples_per_pixel - 1), V.splat(0.0), fn _i, acc ->
-                r = get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, camera_center)
+                r =
+                  get_ray(
+                    i,
+                    j,
+                    pixel00_loc,
+                    pixel_delta_u,
+                    pixel_delta_v,
+                    camera_center,
+                    defocus_angle,
+                    defocus_disk_u,
+                    defocus_disk_v
+                  )
 
                 V.add(acc, ray_color(r, max_depth, world))
               end)
@@ -124,5 +160,13 @@ defmodule Camera do
 
   def degrees_to_radians(deg) do
     deg / 180 * :math.pi()
+  end
+
+  def defocus_disk_sample(center, defocus_disk_u, defocus_disk_v) do
+    p = Random.random_in_unit_disk()
+
+    center
+    |> V.add(V.k(p.x, defocus_disk_u))
+    |> V.add(V.k(p.y, defocus_disk_v))
   end
 end

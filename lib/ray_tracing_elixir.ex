@@ -27,10 +27,12 @@ defmodule RT do
       image_width: image_width,
       samples_per_pixel: 100,
       max_depth: 50,
-      vfov: 90,
+      vfov: 20,
       lookfrom: V.new(-2.0, 2.0, 1.0),
       lookat: V.new(0.0, 0.0, -1.0),
-      vup: V.new(0, 1, 0)
+      vup: V.new(0, 1, 0),
+      defocus_angle: 10.0,
+      focus_dist: 3.4
     })
   end
 end

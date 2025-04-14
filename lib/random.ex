@@ -35,4 +35,14 @@ defmodule Random do
       V.neg(on_unit_sphere)
     end
   end
+
+  def random_in_unit_disk() do
+    p = V.new(Random.float(-1, 1), Random.float(-1, 1), 0)
+
+    if V.length_squared(p) < 1 do
+      p
+    else
+      random_in_unit_disk()
+    end
+  end
 end
