@@ -3,7 +3,11 @@ defmodule Camera do
     :image_width,
     :aspect_ratio,
     :samples_per_pixel,
-    :max_depth
+    :max_depth,
+    :vfov,
+    :lookfrom,
+    :lookat,
+    :vup
   ]
 
   def ray_color(r, max_depth, hittable_list) do
@@ -49,28 +53,39 @@ defmodule Camera do
       image_width: image_width,
       aspect_ratio: aspect_ratio,
       samples_per_pixel: samples_per_pixel,
-      max_depth: max_depth
+      max_depth: max_depth,
+      vfov: vfov,
+      lookfrom: lookfrom,
+      lookat: lookat,
+      vup: vup
     } = config
 
     pixel_samples_scale = 1.0 / samples_per_pixel
 
+    camera_center = lookfrom
+
     image_height = trunc(image_width / aspect_ratio)
 
-    focal_length = 1.0
-    viewport_height = 2.0
+    focal_length = lookfrom |> V.sub(lookat) |> V.length()
+    theta = degrees_to_radians(vfov)
+    h = :math.tan(theta / 2.0)
+    viewport_height = 2.0 * h * focal_length
     viewport_width = viewport_height * (image_width / image_height)
 
-    camera_center = V.new(0, 0, 0)
+    # u,v,w unit basis vectors for camera coordinate frame
+    w = V.make_unit(V.sub(lookfrom, lookat))
+    u = V.make_unit(V.cross(vup, w))
+    v = V.cross(w,u)
 
-    viewport_u = V.new(viewport_width, 0, 0)
-    viewport_v = V.new(0, -viewport_height, 0)
+    viewport_u = V.k(viewport_width, u)
+    viewport_v = V.k(-1.0 * viewport_height, v)
 
     pixel_delta_u = V.div(viewport_u, image_width)
     pixel_delta_v = V.div(viewport_v, image_height)
 
     viewport_upper_left =
       camera_center
-      |> V.sub(V.new(0, 0, focal_length))
+      |> V.sub(V.k(focal_length,w))
       |> V.sub(V.div(viewport_u, 2))
       |> V.sub(V.div(viewport_v, 2))
 
@@ -105,5 +120,9 @@ defmodule Camera do
 
     File.write("./test.ppm", file)
     IO.puts("Done")
+  end
+
+  def degrees_to_radians(deg) do
+    deg / 180 * :math.pi()
   end
 end
