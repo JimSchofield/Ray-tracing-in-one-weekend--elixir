@@ -9,7 +9,8 @@ defmodule RT do
 
     material_ground = %Lambertian{albedo: V.new(0.8, 0.8, 0.0)}
     material_center = %Lambertian{albedo: V.new(0.1, 0.2, 0.5)}
-    material_left = %Dialectric{ refraction_index: 1.0 / 1.33 }
+    material_left = %Dialectric{ refraction_index: 1.50 }
+    material_bubble = %Dialectric{ refraction_index: 1.0 / 1.5 }
     material_right = %Metal{ color: V.new(0.8, 0.6, 0.2), fuzz: 1.0}
 
     # World
@@ -18,6 +19,7 @@ defmodule RT do
       |> HittableList.add(Sphere.new(V.new(0.0, -100.5, -1.0), 100.0, material_ground))
       |> HittableList.add(Sphere.new(V.new(0.0, 0.0, -1.2), 0.5, material_center))
       |> HittableList.add(Sphere.new(V.new(-1.0, 0.0, -1.0), 0.5, material_left))
+      |> HittableList.add(Sphere.new(V.new(-1.0, 0.0, -1.0), 0.4, material_bubble))
       |> HittableList.add(Sphere.new(V.new(1.0, 0.0, -1.0), 0.5, material_right))
 
     Camera.render(world, %Camera{

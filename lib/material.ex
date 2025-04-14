@@ -62,7 +62,7 @@ defmodule Dialectric do
       cannot_refract = ri * sin_theta > 1.0
 
       direction =
-        if cannot_refract do
+        if cannot_refract || reflectance(cos_theta, ri) > Random.float() do
           V.reflect(unit_direction, rec.normal)
         else
           V.refract(unit_direction, rec.normal, ri)
@@ -71,6 +71,13 @@ defmodule Dialectric do
       scattered = Ray.new(rec.point, direction)
 
       {true, attenuation, scattered}
+    end
+
+    def reflectance(cosine, refraction_index) do
+      r = (1.0 - refraction_index) / (1.0 + refraction_index)
+      r0 = r * r
+
+      r0 + (1.0 - r0) * :math.pow(1.0 - cosine, 5)
     end
   end
 end
