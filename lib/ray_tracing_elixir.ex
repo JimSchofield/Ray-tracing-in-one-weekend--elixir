@@ -27,7 +27,7 @@ defmodule RT do
       image_width: image_width,
       samples_per_pixel: 100,
       max_depth: 50,
-      vfov: 20,
+      vfov: 40,
       lookfrom: V.new(-2.0, 2.0, 1.0),
       lookat: V.new(0.0, 0.0, -1.0),
       vup: V.new(0, 1, 0),

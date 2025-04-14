@@ -117,11 +117,13 @@ defmodule Camera do
     pixel00_loc = V.add(viewport_upper_left, V.div(V.add(pixel_delta_u, pixel_delta_v), 2))
 
     result =
-      Enum.reduce(0..(image_height - 1), "", fn j, jacc ->
+      Flow.from_enumerable(0..(image_height - 1))
+      |> Flow.map(fn j ->
         IO.puts("Rendering row #{j}")
 
-        jacc <>
-          Enum.reduce(0..(image_width - 1), "", fn i, iacc ->
+        result =
+          Flow.from_enumerable(0..(image_width - 1))
+          |> Flow.map(fn i ->
             pixel_color =
               Enum.reduce(0..(samples_per_pixel - 1), V.splat(0.0), fn _i, acc ->
                 r =
@@ -142,9 +144,15 @@ defmodule Camera do
 
             pixel = Color.write_color(V.k(pixel_color, pixel_samples_scale))
 
-            iacc <> pixel
+            pixel
           end)
+          |> Enum.to_list()
+          |> Enum.join()
+
+        result
       end)
+      |> Enum.to_list()
+      |> Enum.join()
 
     header = """
     P3
