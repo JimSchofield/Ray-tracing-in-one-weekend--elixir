@@ -6,6 +6,10 @@ defmodule Sphere do
   end
 
   def hit(object, r, interval) do
+    if is_nil(object) do
+      dbg()
+    end
+
     oc = V.sub(object.center, r.origin)
     a = V.length_squared(r.direction)
     h = V.dot(r.direction, oc)
