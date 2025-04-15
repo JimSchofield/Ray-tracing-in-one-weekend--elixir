@@ -63,9 +63,9 @@ defmodule RT do
 
     Camera.render(world, %Camera{
       aspect_ratio: 16.0 / 9.0,
-      image_width: 200,
-      samples_per_pixel: 10,
-      max_depth: 5,
+      image_width: 1200,
+      samples_per_pixel: 500,
+      max_depth: 50,
       vfov: 20,
       lookfrom: V.new(13, 2.0, 3.0),
       lookat: V.new(0.0, 0.0, 0.0),
